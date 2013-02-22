@@ -1,0 +1,287 @@
+
+               Interceptors 1.2 Maintenance Release
+               ====================================
+
+              (Updated February 21, 2013)
+
+Following is a description of the changes to the Interceptors Specification 
+introduced in the 1.2 Maintenance Release.
+If a JIRA issue was filed for the change, it is listed in parentheses.
+
+Please send comments and feedback to users@interceptors-spec.java.net
+===========================================================================
+
+1. Editorial Changes:
+---------------------------------------------------------------------------
+
+- Editorial cleanup and conversion to the standard template.
+
+- Assigned chapter numbers to sections and rearranged them for consistency.
+
+- Added Chapter 1 (Overview)
+
+- Added Chapter 3, derived from Chapter 9 of the CDI specification.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-5)
+
+- Rearranged various sections and examples for better flow.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-4)
+
+- Explained how interceptors are enabled
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-4)
+
+- Added examples with interceptor bindings to common sections.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-4)
+
+- Moved description of the ejb-jar.xm deployment descriptor elements to 
+  the EJB 3.2 specification.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-7)
+
+- Added a note on how interceptors are invoked if the same method is used 
+  as a timeout method and a business method and it has both the around-
+  timeout and around-invoke interceptors associated with it.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-6)
+
+- Explicitly noted that around-invoke and around-timeout methods may be 
+  defined on superclasses of the target class or interceptor classes. However,
+  only one method of each type may be defined on a given class.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-6)
+
+- Added a note to the around-invoke interceptor method explaining that the
+  throw Exception clause in the signature may be replaced with the specific 
+  checked exception declared on the method it interpose on.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-6)
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-8)
+
+- Added a note to the around-timeout interceptor method explaining that the
+  throw Exception clause in the signature is not required.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-6)
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-8)
+
+- Added a note that transaction context of interceptors may be changed by 
+  transactional interceptors in the invocation chain
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-9)
+
+- Clarified statement regarding transaction context of lifecycle callback 
+  methods, as it was not correct for singleton and stateful session beans. 
+  Expanded footnote to clarify.
+  (http://java.net/jira/browse/INTERCEPTORS_SPEC-2)
+
+===========================================================================
+
+2. Relaxed method signature rules for the lifecycle interceptor methods 
+declared on an interceptor class:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-10)
+---------------------------------------------------------------------------
+
+  Lifecycle callback interceptor methods defined on an interceptor class must 
+  have one of the following signatures:
+
+      void <METHOD>(InvocationContext)
+      Object <METHOD>(InvocationContext) throws Exception
+
+  Note: A lifecycle callback interceptor method must not throw application 
+  exceptions, but it may be declared to throw checked exceptions including the 
+  java.lang.Exception if the same interceptor method interposes on business 
+  or timeout methods in addition to lifecycle events. If a lifecycle callback 
+  interceptor method returns a value, it is ignored by the container.
+
+===========================================================================
+
+3. Added standard Priority ranges as a static inner class of the 
+javax.interceptor.Interceptor interface:
+---------------------------------------------------------------------------
+    /**
+     * <p>Priorities that define the order in which interceptors are
+     * invoked.  These values should be used with the
+     * {@link javax.annotations.Priority Priority} annotation.
+     * <ul>
+     * <li>Interceptors defined by platform specifications should have
+     * priority values in the range <a href="#PLATFORM_BEFORE">PLATFORM_BEFORE</a>
+     * up until <a href="#LIBRARY_BEFORE">LIBRARY_BEFORE</a>, or starting at
+     * <a href="#PLATFORM_AFTER">PLATFORM_AFTER</a>.
+     * <li>Interceptors defined by extension libraries
+     * should have priority values in the range <a href="#LIBRARY_BEFORE">LIBRARY_BEFORE</a>
+     * up until <a href="#APPLICATION">APPLICATION</a>, or
+     * <a href="#LIBRARY_AFTER">LIBRARY_AFTER</a> up until
+     * <a href="#PLATFORM_AFTER">PLATFORM_AFTER</a>.
+     * <li>Interceptors defined by applications should have priority values in the range
+     * <a href="#APPLICATION">APPLICATION</a> up until
+     * <a href="#LIBRARY_AFTER">LIBRARY_AFTER</a>.
+     * </ul>
+     *
+     * <p>An interceptor that must be invoked before or
+     * after another defined interceptor can choose any appropriate
+     * value.</p>
+     *
+     * <p>Interceptors with smaller priority values are called first. If more than
+     * one interceptor has the same priority, the relative order of these interceptor
+     * is undefined.</p>
+     *
+     * <p>For example, an extension library might define an interceptor
+     * like this:</p>
+     *
+     * <pre>
+     * &#064;Priority(Interceptor.Priority.LIBRARY_BEFORE+10)
+     * &#064;Interceptor
+     * public class ValidationInterceptor { ... }
+     * </pre>
+     *
+     *
+     * @since Interceptors 1.2
+     */
+    public static class Priority {
+        private Priority() { }  // don't allow instances
+
+        /**
+         * Start of range for early interceptors defined by
+         * platform specifications.
+         */
+        public static final int PLATFORM_BEFORE = 0;
+
+        /**
+         * Start of range for early interceptors defined by
+         * extension libraries.
+         */
+        public static final int LIBRARY_BEFORE = 1000;
+
+        /**
+         * Start of range for interceptors defined by
+         * applications.
+         */
+        public static final int APPLICATION = 2000;
+
+        /**
+         * Start of range for late interceptors defined by
+         * extension libraries.
+         */
+        public static final int LIBRARY_AFTER = 3000;
+
+        /**
+         * Start of range for late interceptors defined by
+         * platform specifications.
+         */
+        public static final int PLATFORM_AFTER = 4000;
+    }
+
+===========================================================================
+
+4. Added the AroundConstruct lifecycle callback interceptor:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-3)
+---------------------------------------------------------------------------
+    /**
+     * <p>Designates an interceptor method that receives a callback when
+     * the target class constructor is invoked.
+     * </p>
+     * <p>The method to which this annotation is applied must have one of the
+     * following signatures.
+     * </p>
+     *
+     * <pre>
+     * &#064;AroundConstruct
+     * public void &#060;METHOD&#062;(InvocationContext ctx) { ... }
+     * </pre>
+     *
+     * <pre>
+     * &#064;AroundConstruct
+     * public Object &#060;METHOD&#062;(InvocationContext ctx) throws Exception { ... }
+     * </pre>
+     *
+     * <p>An <tt>AroundConstruct</tt> interceptor method may be only declared on an interceptor class.</p>
+     *
+     * <p>An interceptor class must not declare more than one <tt>AroundConstruct</tt>
+     * method.</p>
+     *
+     * <p><tt>AroundConstruct</tt> methods may throw runtime exceptions,
+     * but not checked exceptions.
+     * </p>
+     *
+     * <p> The target instance is created and its constructor injection is performed, if applicable,
+     * when the last interceptor method in the <tt>AroundConstruct</tt> interceptor chain invokes
+     * the {@link javax.interceptor.InvocationContext#proceed()} method.
+     *
+     * <p>An <tt>AroundConstruct</tt> interceptor method should exercise caution accessing the instance which
+     * constructor it interposes on.</p>
+     *
+     * @since Interceptors 1.2
+     */
+    @Target({ElementType.METHOD})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface AroundConstruct {
+    }
+    
+---------------------------------------------------------------------------
+  When a AroundConstruct lifecycle callback interceptor is used, the 
+  following rules apply:
+---------------------------------------------------------------------------
+  - The AroundConstruct lifecycle callback is invoked after the dependency 
+    injection has been completed on instances of all interceptor classes 
+    associated with the target class. Injection of the target component into 
+    interceptor instances that are invoked during the AroundConstruct lifecycle 
+    callback is not supported.
+  - The target instance is created and its constructor injection is performed, 
+    if applicable, when the last interceptor method in the AroundConstruct 
+    interceptor chain invokes the InvocationContext.proceed method. If the 
+    InvocationContext.proceed method is not invoked by an interceptor method, 
+    the target instance will not be created.
+  - The AroundConstruct interceptor method can access the constructed instance 
+    using the InvocationContext.getTarget method after the 
+    InvocationContext.proceed completes.
+  - Dependency injection on the target instance is not completed until after 
+    invocation of all interceptor methods in the AroundConstruct interceptor 
+    chain complete successfully.
+  - The PostConstruct lifecycle callback chain for the target instance, if any, 
+    will be invoked after the dependency injection has been completed on the 
+    target instance.
+  - An AroundConstruct lifecycle callback interceptor method should exercise 
+    caution when invoking methods of the target instance since its dependency 
+    injection may not have been completed.
+    
+===========================================================================
+
+5. Extended InvocationContext with getConstructor method:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-3)
+---------------------------------------------------------------------------
+    /**
+     * Returns the constructor of the target class for which the interceptor
+     * was invoked.  For {@link AroundConstruct} interceptor, the constructor of the
+     * target class is returned. For all other interceptors,
+     * a null value is returned.
+     *
+     * @return the constructor, or a null value
+     */
+    public Constructor getConstructor();
+
+===========================================================================
+
+6. Added AroundConstruct callback to the rules for the InvocationContext.getTarget 
+   return value:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-3)
+---------------------------------------------------------------------------
+    /**
+     * Returns the target instance. For the {@link AroundConstruct} lifecycle callback
+     * interceptor method, the <tt>getTarget</tt> returns <code>null</code>
+     * if called before the {@link #proceed} method.
+     *
+     * @return the target instance
+     */
+    public Object getTarget();
+
+===========================================================================
+
+7. Added AroundConstruct callback to the rules for the InvocationContext.proceed 
+   return value:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-3)
+---------------------------------------------------------------------------
+
+     * Proceed to the next interceptor in the interceptor chain. For the
+     * around-invoke or around-timeout interceptor methods, the invocation of the
+     * last interceptor method in the chain causes the invocation of the target
+     * class method. For {@link AroundConstruct} lifecycle callback interceptor
+     * methods, the invocation of the last interceptor method in the chain causes
+     * the target instance to be created. For all other lifecycle callback
+     * interceptor methods, if there is no callback method defined on the target
+     * class, the invocation of proceed in the last interceptor method in the chain
+     * is a no-op
+
+===========================================================================
+
