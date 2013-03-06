@@ -2,7 +2,7 @@
                Interceptors 1.2 Maintenance Release
                ====================================
 
-              (Updated February 21, 2013)
+                   (Updated March 6, 2013)
 
 Following is a description of the changes to the Interceptors Specification 
 introduced in the 1.2 Maintenance Release.
@@ -249,7 +249,7 @@ javax.interceptor.Interceptor interface:
      *
      * @return the constructor, or a null value
      */
-    public Constructor getConstructor();
+    public Constructor<?> getConstructor();
 
 ===========================================================================
 
