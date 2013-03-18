@@ -2,7 +2,7 @@
                Interceptors 1.2 Maintenance Release
                ====================================
 
-                   (Updated March 6, 2013)
+                   (Updated March 18, 2013)
 
 Following is a description of the changes to the Interceptors Specification 
 introduced in the 1.2 Maintenance Release.
@@ -285,3 +285,48 @@ javax.interceptor.Interceptor interface:
 
 ===========================================================================
 
+8. Extended method-level interceptor binding options to lifecycle callback method 
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-14)
+
+===========================================================================
+
+9. Changed return value rules for InvocationContext#getMethod method:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-15)
+---------------------------------------------------------------------------
+    /**
+     * Returns the method of the target class for which the interceptor
+     * was invoked. In a lifecycle callback interceptor for which there is no
+     * corresponding lifecycle callback method on the target class or in the
+     * {@link AroundConstruct} lifecycle callback interceptor method,
+     * <code>getMethod</code> returns null.
+     *
+     * @return the method, or a null value
+     */
+    public Method getMethod();
+
+===========================================================================
+
+10. Enabled constructor-level interceptor binding options for bean class 
+    constructors:
+(http://java.net/jira/browse/INTERCEPTORS_SPEC-12)
+---------------------------------------------------------------------------
+    - Renamed section 2.8 to "Constructor- and Method-level Interceptors"
+
+    - Added the following:
+      "Constructor-level interceptors are interceptor classes associated 
+      with a constructor of the target class."
+---------------------------------------------------------------------------
+
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcludeClassInterceptors {}
+
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcludeDefaultInterceptors {}
+
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Interceptors
+
+===========================================================================
