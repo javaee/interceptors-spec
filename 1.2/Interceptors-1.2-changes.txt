@@ -285,12 +285,7 @@ javax.interceptor.Interceptor interface:
 
 ===========================================================================
 
-8. Extended method-level interceptor binding options to lifecycle callback method 
-(http://java.net/jira/browse/INTERCEPTORS_SPEC-14)
-
-===========================================================================
-
-9. Changed return value rules for InvocationContext#getMethod method:
+8. Changed return value rules for InvocationContext#getMethod method:
 (http://java.net/jira/browse/INTERCEPTORS_SPEC-15)
 ---------------------------------------------------------------------------
     /**
@@ -306,7 +301,7 @@ javax.interceptor.Interceptor interface:
 
 ===========================================================================
 
-10. Enabled constructor-level interceptor binding options for bean class 
+9. Enabled constructor-level interceptor binding options for bean class 
     constructors:
 (http://java.net/jira/browse/INTERCEPTORS_SPEC-12)
 ---------------------------------------------------------------------------
