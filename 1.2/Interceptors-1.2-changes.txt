@@ -2,7 +2,7 @@
                Interceptors 1.2 Maintenance Release
                ====================================
 
-                   (Updated March 18, 2013)
+                     (Updated April 8, 2013)
 
 Following is a description of the changes to the Interceptors Specification 
 introduced in the 1.2 Maintenance Release.
